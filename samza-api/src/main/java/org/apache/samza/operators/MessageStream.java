@@ -25,9 +25,8 @@ import org.apache.samza.operators.functions.FlatMapFunction;
 import org.apache.samza.operators.functions.JoinFunction;
 import org.apache.samza.operators.functions.MapFunction;
 import org.apache.samza.operators.functions.SinkFunction;
-import org.apache.samza.operators.windows.Window;
+import org.apache.samza.operators.windows.WindowFunction;
 import org.apache.samza.operators.windows.WindowOutput;
-import org.apache.samza.operators.windows.WindowState;
 
 import java.util.Collection;
 
@@ -37,7 +36,7 @@ import java.util.Collection;
  * <p>
  * A {@link MessageStream} can be transformed into another {@link MessageStream} by applying the transforms in this API.
  *
- * @param <M>  type of {@link MessageEnvelope}s in this stream
+ * @param <M> type of {@link MessageEnvelope}s in this stream
  */
 @InterfaceStability.Unstable
 public interface MessageStream<M extends MessageEnvelope> {
@@ -83,21 +82,22 @@ public interface MessageStream<M extends MessageEnvelope> {
   void sink(SinkFunction<M> sinkFn);
 
   /**
-   * Groups the {@link MessageEnvelope}s in this {@link MessageStream} according to the provided {@link Window} semantics
+   * Groups the {@link MessageEnvelope}s in this {@link MessageStream} according to the provided {@link WindowFunction} semantics
    * (e.g. tumbling, sliding or session windows) and returns the transformed {@link MessageStream} of
    * {@link WindowOutput}s.
    * <p>
    * Use the {@link org.apache.samza.operators.windows.Windows} helper methods to create the appropriate windows.
    *
-   * @param window  the {@link Window} to group and process {@link MessageEnvelope}s from this {@link MessageStream}
-   * @param <WK>  the type of key in the {@link WindowOutput} from the {@link Window}
-   * @param <WV>  the type of value in the {@link WindowOutput} from the {@link Window}
-   * @param <WS>  the type of window state kept in the {@link Window}
+   * @param windowFunction  the {@link WindowFunction} to group and process {@link MessageEnvelope}s from this {@link MessageStream}
+   * @param <K> type of key in the {@link MessageEnvelope} on which the window is computed on. If a key is specified,
+   *           outputs are emitted per-key per-window.
+   * @param <WK>  the type of key in the {@link WindowOutput} from this window
+   * @param <WV>  the type of value in the {@link WindowOutput} from this window
    * @param <WM>  the type of {@link WindowOutput} in the transformed {@link MessageStream}
    * @return  the transformed {@link MessageStream}
    */
-  <WK, WV, WS extends WindowState<WV>, WM extends WindowOutput<WK, WV>> MessageStream<WM> window(
-      Window<M, WK, WV, WM> window);
+  <K, WK, WV, WM extends WindowOutput<WK, WV>> MessageStream<WM> window(WindowFunction<M, K, WK, WV, WM> windowFunction);
+
 
   /**
    * Joins this {@link MessageStream} with another {@link MessageStream} using the provided pairwise {@link JoinFunction}.
