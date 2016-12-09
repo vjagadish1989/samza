@@ -28,7 +28,7 @@ import org.apache.samza.annotation.InterfaceStability;
  * @param <WV>  the type for window output value
  */
 @InterfaceStability.Unstable
-public interface WindowState<WV> {
+public interface WindowPaneState<WV> {
   /**
    * Method to get the system time when the first {@link org.apache.samza.operators.data.MessageEnvelope}
    * in the window is received

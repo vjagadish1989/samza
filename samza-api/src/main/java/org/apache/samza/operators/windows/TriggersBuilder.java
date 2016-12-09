@@ -64,7 +64,7 @@ public final class TriggersBuilder<M extends MessageEnvelope, K, V> {
   }
 
 
-  static class Trigger<K, V> {
+  public static class Trigger<K, V> {
     private final TriggerType type;
 
     Trigger(TriggerType type) {
@@ -76,7 +76,7 @@ public final class TriggersBuilder<M extends MessageEnvelope, K, V> {
    * Defines a {@link Trigger} that triggers periodically based on the specified time delay.
    *
    */
-  static class PeriodicTimeTrigger extends Trigger {
+  public static class PeriodicTimeTrigger extends Trigger {
     private final long delayMillis;
     private final Time.TimeCharacteristic timeCharacteristic;
 
@@ -100,7 +100,7 @@ public final class TriggersBuilder<M extends MessageEnvelope, K, V> {
    * in the window pane.
    *
    */
-  static class TimeSinceFirstMessageTrigger extends Trigger {
+  public static class TimeSinceFirstMessageTrigger extends Trigger {
     private final long delayMillis;
     private final Time.TimeCharacteristic timeCharacteristic;
 
@@ -123,7 +123,7 @@ public final class TriggersBuilder<M extends MessageEnvelope, K, V> {
   /*
    * Defines a {@link Trigger} that triggers when there is no message in a window pane for the specified gap duration.
    */
-  static class TimeSinceLastMessageTrigger extends Trigger {
+  public static class TimeSinceLastMessageTrigger extends Trigger {
     private final long gapMillis;
     private final Time.TimeCharacteristic timeCharacteristic;
 
@@ -146,7 +146,7 @@ public final class TriggersBuilder<M extends MessageEnvelope, K, V> {
    * Defines a {@link Trigger} that triggers based on the count of messages in the {@link Window}.
    */
 
-  static class CountTrigger extends Trigger {
+  public static class CountTrigger extends Trigger {
     private final long count;
 
     CountTrigger(TriggerType type , long count) {
