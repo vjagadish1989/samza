@@ -103,8 +103,7 @@ public class PassthroughJobCoordinator implements JobCoordinator {
     }
   }
 
-  @Override
-  public void setListener(JobCoordinatorListener listener) {
+  public void setCoordinatorListener(JobCoordinatorListener listener) {
     this.coordinatorListener = listener;
   }
 

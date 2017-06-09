@@ -77,7 +77,7 @@ public interface JobCoordinator {
    *
    * @param listener An instance of {@link JobCoordinatorListener}
    */
-  void setListener(JobCoordinatorListener listener);
+  void setCoordinatorListener(JobCoordinatorListener listener);
 
   /**
    * Returns the current JobModel

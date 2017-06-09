@@ -126,7 +126,7 @@ public class StreamProcessor {
     this.processorListener = processorListener;
     this.jobCoordinator = (jobCoordinator != null) ? jobCoordinator : getJobCoordinator();
     this.jobCoordinatorListener = createJobCoordinatorListener();
-    this.jobCoordinator.setListener(jobCoordinatorListener);
+    this.jobCoordinator.setCoordinatorListener(jobCoordinatorListener);
   }
 
   /**

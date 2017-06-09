@@ -39,6 +39,11 @@ import scala.runtime.AbstractFunction0;
 public class TaskFactoryUtil {
   private static final Logger log = LoggerFactory.getLogger(TaskFactoryUtil.class);
 
+  public static Object createTaskFactory(Config config, ApplicationRunner runner) {
+    StreamApplication application = createStreamApplication(config);
+    return createTaskFactory(config, application, runner);
+  }
+
   /**
    * This method creates a task factory class based on the configuration and {@link StreamApplication}
    *
