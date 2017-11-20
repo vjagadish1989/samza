@@ -89,11 +89,16 @@ public class ContainerProcessManager implements ClusterResourceManager.Callback 
 
 
   /**
-   * A map that keeps track of how many times each container failed. The key is the container ID, and the
+   * A map that keeps track of how many times each container failed after it has started. The key is the container ID, and the
    * value is the {@link ResourceFailure} object that has a count of failures.
    *
    */
   private final Map<String, ResourceFailure> containerFailures = new HashMap<>();
+
+  /**
+   * Map that tracks how many times requests to start containers fail.
+   */
+  private final Map<String, Integer> containerStartFailures = new HashMap<>();
 
   private final ContainerProcessManagerMetrics metrics;
 
@@ -377,6 +382,33 @@ public class ContainerProcessManager implements ClusterResourceManager.Callback 
     }
   }
 
+  @Override
+  public void onStreamProcessorLaunchSuccess(SamzaResource resource) {
+    if (state.neededContainers.decrementAndGet() == 0) {
+      state.jobHealthy.set(true);
+    }
+    // WRONG!
+    String containerId = null;
+
+    for (Map.Entry<String, SamzaResource> entry: state.pendingContainers.entrySet()) {
+      if (entry.getValue().getResourceID().equals(resource.getResourceID())) {
+        log.info("Matching container ID found " + entry.getKey() + " " + entry.getValue());
+        containerId = entry.getKey();
+        break;
+      }
+    }
+
+    state.runningContainers.put(containerId, resource);
+  }
+
+  @Override
+  public void onStreamProcessorLaunchFailure(SamzaResource resource, Throwable t) {
+    log.info("Releasing unstartable container {}", resource.getResourceID());
+    clusterResourceManager.releaseResources(resource);
+
+    clusterResourceManager.requestResources(new Samza);
+  }
+
   /**
    * An error in the callback terminates the JobCoordinator
    * @param e the underlying exception/error
@@ -412,7 +444,4 @@ public class ContainerProcessManager implements ClusterResourceManager.Callback 
     }
     return factory;
   }
-
-
-
 }

@@ -113,7 +113,7 @@ public abstract class ClusterResourceManager {
    * @throws SamzaContainerLaunchException  when there's an error during the requesting launch.
    *
    */
-  public abstract void launchStreamProcessor(SamzaResource resource, CommandBuilder builder) throws SamzaContainerLaunchException;
+  public abstract void launchStreamProcessor(SamzaResource resource, CommandBuilder builder);
 
 
   public abstract void stop(SamzaApplicationState.SamzaAppStatus status);
@@ -142,6 +142,11 @@ public abstract class ClusterResourceManager {
      * @param resources statuses for the resources that were completed.
      */
     void onResourcesCompleted(List<SamzaResourceStatus> resources);
+
+
+    void onStreamProcessorLaunchSuccess(SamzaResource resource);
+
+    void onStreamProcessorLaunchFailure(SamzaResource resource, Throwable t);
 
     /***
      * This callback is invoked when there is an error in the ClusterResourceManager. This is
