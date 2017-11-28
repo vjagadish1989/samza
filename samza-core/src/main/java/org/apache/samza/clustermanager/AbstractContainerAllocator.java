@@ -153,6 +153,7 @@ public abstract class AbstractContainerAllocator implements Runnable {
         new Object[]{preferredHost, String.valueOf(containerID), request.getRequestTimestampMs(), resource.getResourceID()});
       //launches a StreamProcessor on the resource
       clusterResourceManager.launchStreamProcessor(resource, builder);
+
   }
 
   /**
