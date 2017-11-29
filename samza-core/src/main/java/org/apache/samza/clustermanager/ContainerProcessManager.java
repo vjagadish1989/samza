@@ -387,7 +387,7 @@ public class ContainerProcessManager implements ClusterResourceManager.Callback 
     if (state.neededContainers.decrementAndGet() == 0) {
       state.jobHealthy.set(true);
     }
-    // WRONG!
+
     String containerId = null;
 
     for (Map.Entry<String, SamzaResource> entry: state.pendingContainers.entrySet()) {
@@ -403,10 +403,27 @@ public class ContainerProcessManager implements ClusterResourceManager.Callback 
 
   @Override
   public void onStreamProcessorLaunchFailure(SamzaResource resource, Throwable t) {
+    log.info("Got a launch failure for SamzaResource {} with exception {}", resource, t);
+
     log.info("Releasing unstartable container {}", resource.getResourceID());
     clusterResourceManager.releaseResources(resource);
 
-    clusterResourceManager.requestResources(new Samza);
+    String containerId = null;
+    for (Map.Entry<String, SamzaResource> entry: state.pendingContainers.entrySet()) {
+      if (entry.getValue().getResourceID().equals(resource.getResourceID())) {
+        log.info("Matching container ID found " + entry.getKey() + " " + entry.getValue());
+        containerId = entry.getKey();
+        break;
+      }
+    }
+
+    if (containerId != null) {
+      log.info("Launch of ContainerId: {} failed on host: {}. Falling back to ANY_HOST", containerId, resource.getHost());
+      clusterResourceManager.requestResources(new SamzaResourceRequest(resource.getNumCores(), resource.getMemoryMb(),
+          ResourceRequestState.ANY_HOST, containerId));
+    } else {
+      log.warn("SamzaResource {} was not in pending state. Got an invalid callback for a launch request that was not made", resource);
+    }
   }
 
   /**

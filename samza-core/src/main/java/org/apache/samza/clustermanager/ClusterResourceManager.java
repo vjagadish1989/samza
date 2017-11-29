@@ -110,7 +110,6 @@ public abstract class ClusterResourceManager {
    * @param builder A builder implementation that encapsulates the context for the
    *                StreamProcessor. A builder encapsulates the ID for the processor, the
    *                build environment, the command to execute etc.
-   * @throws SamzaContainerLaunchException  when there's an error during the requesting launch.
    *
    */
   public abstract void launchStreamProcessor(SamzaResource resource, CommandBuilder builder);

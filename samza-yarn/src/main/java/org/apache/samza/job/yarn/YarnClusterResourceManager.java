@@ -664,7 +664,7 @@ public class YarnClusterResourceManager extends ClusterResourceManager implement
     state.runningYarnContainers.put(containerId.toString(), new YarnContainer(container));
     SamzaResource resource = new SamzaResource(container.getResource().getVirtualCores(),
         container.getResource().getMemory(), container.getNodeId().getHost(), containerId.toString());
-    clusterManagerCallback.onStreamProcessorStartComplete(resource);
+    clusterManagerCallback.onStreamProcessorLaunchSuccess(resource);
   }
 
   @Override
@@ -683,7 +683,7 @@ public class YarnClusterResourceManager extends ClusterResourceManager implement
     SamzaResource resource = new SamzaResource(container.getResource().getVirtualCores(),
         container.getResource().getMemory(), container.getNodeId().getHost(), containerId.toString());
 
-    clusterManagerCallback.onStreamProcessorStartError(resource, new SamzaContainerLaunchException(t));
+    clusterManagerCallback.onStreamProcessorLaunchFailure(resource, new SamzaContainerLaunchException(t));
   }
 
   @Override
