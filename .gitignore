@@ -1,4 +1,4 @@
-project/boot/
+samza-core/src/main/java/org/apache/samza/clustermanager/ContainerProcessManager.javaproject/boot/
 target/
 .classpath
 .project
