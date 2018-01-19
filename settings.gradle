@@ -26,7 +26,8 @@ include \
   'samza-azure',
   'samza-sql',
   'samza-aws',
-  'samza-tools'
+  'samza-tools',
+  'samza-kafka-benchmark'
 
 def scalaModules = [
         'samza-core',
