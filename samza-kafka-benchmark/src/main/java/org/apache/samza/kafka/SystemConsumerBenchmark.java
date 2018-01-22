@@ -82,7 +82,7 @@ public class SystemConsumerBenchmark {
     long totalTime = System.currentTimeMillis() - startTime;
     System.out.println(String.format("Total number of messages read: %s", numMessages));
     System.out.println(String.format("Total time taken: %s ms", totalTime));
-    System.out.println(String.format("Messages per second: %s", numMessages.get() * 1000 / totalTime));
+    System.out.println(String.format("Messages per second: %s", numMessages.get() / (totalTime/1000)));
   }
 
   public Map<SystemStreamPartition, String> getOldestOffsets() {
