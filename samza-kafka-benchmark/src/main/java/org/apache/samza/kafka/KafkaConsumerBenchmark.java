@@ -76,7 +76,7 @@ public class KafkaConsumerBenchmark {
     long startTime = System.currentTimeMillis();
 
     while (System.currentTimeMillis() - startTime < testDuration) {
-      pollConsumer(consumer, topicPartitions, 10);
+      pollConsumer(consumer, topicPartitions, 1000);
     }
 
     totalTimeMillis = System.currentTimeMillis() - startTime;
@@ -89,9 +89,12 @@ public class KafkaConsumerBenchmark {
     ConsumerRecords<byte[], byte[]> records;
     // make a call on the client
     try {
+      System.out.println("inside poll");
       records = consumer.poll(timeout);
 
       for (ConsumerRecord<byte[], byte[]> record: records) {
+        System.out.println("inside poll2");
+
         totalMessages++;
       }
 
