@@ -75,7 +75,7 @@ public class KafkaConsumerBenchmark {
 
     long startTime = System.currentTimeMillis();
 
-    while (System.currentTimeMillis() - startTime > testDuration) {
+    while (System.currentTimeMillis() - startTime < testDuration) {
       pollConsumer(consumer, topicPartitions, 10);
     }
 
@@ -91,9 +91,6 @@ public class KafkaConsumerBenchmark {
     try {
       records = consumer.poll(timeout);
 
-      if (records.count() > 0) {
-        System.out.println(String.format("Obtained %s records from partitions ", records.count()));
-      }
       for (ConsumerRecord<byte[], byte[]> record: records) {
         totalMessages++;
       }
@@ -105,15 +102,15 @@ public class KafkaConsumerBenchmark {
 
   private void printStats() {
     System.out.println("==================================================");
-    System.out.println("Total time taken: (secs) " + totalTimeMillis / (1000000000.00));
-    System.out.println("Total messages: " + totalMessages + " QPS: " + (totalMessages ) / totalTimeMillis);
+    System.out.println("Total time taken: (secs) " + totalTimeMillis / 1000.00);
+    System.out.println("Total messages: " + totalMessages + " QPS: " + (totalMessages ) / (totalTimeMillis/1000.00));
   }
 
   public static void main(String[] args) throws Exception {
-    String bootstrapUrl = args[1];
-    int maxPollRecords = Integer.parseInt(args[0]);
-    int maxPartitionId = Integer.parseInt(args[1]);
-    long testDuration = Long.parseLong(args[2]);
+    String bootstrapUrl = args[0];
+    int maxPollRecords = Integer.parseInt(args[1]);
+    int maxPartitionId = Integer.parseInt(args[2]);
+    long testDuration = Long.parseLong(args[3]);
     KafkaConsumerBenchmark perf = new KafkaConsumerBenchmark(bootstrapUrl, maxPollRecords, maxPartitionId, testDuration);
     perf.testConsumerBehavior();
   }

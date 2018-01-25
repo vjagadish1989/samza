@@ -20,6 +20,7 @@
 package org.apache.samza.kafka;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.samza.Partition;
 import org.apache.samza.config.Config;
 import org.apache.samza.config.MapConfig;
@@ -33,12 +34,13 @@ import org.apache.samza.system.SystemStreamPartition;
 import org.apache.samza.util.Util;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SystemConsumerBenchmark {
+public class NewSystemConsumerBenchmark {
 
   private final String factoryClassName;
   private final SystemFactory systemFactory;
@@ -46,31 +48,34 @@ public class SystemConsumerBenchmark {
   private final Config config;
 
   private final Set<String> topicsToConsumeFrom;
+  private final Set<SystemStreamPartition> subscribedPartitions;
   private final int timeToRunSecs;
 
-  public SystemConsumerBenchmark(String factoryClassName, Config config, int timeToRun) {
+  public NewSystemConsumerBenchmark(String factoryClassName, Config config, int timeToRun) {
     this.factoryClassName = factoryClassName;
     this.systemFactory = Util.getObj(factoryClassName);
     this.topicsToConsumeFrom = ImmutableSet.of("PageViewEvent");
     this.config = config;
     this.systemConsumer = systemFactory.getConsumer("kafka", config, new MetricsRegistryMap());
     this.timeToRunSecs = timeToRun;
+    this.subscribedPartitions = new HashSet<SystemStreamPartition>();
   }
 
   public void registerOffsets() {
-    final Map<SystemStreamPartition, String> oldestOffsets = getOldestOffsets();
-    oldestOffsets.forEach((topicPartition, oldestOffset) -> {
-      systemConsumer.register(topicPartition, oldestOffset);
-    });
+    for(int partitionId = 0; partitionId < 256; partitionId++) {
+      SystemStreamPartition ssp = new SystemStreamPartition("kafka", "PageViewEvent", new Partition(partitionId));
+      systemConsumer.register(ssp, "junk");
+      subscribedPartitions.add(ssp);
+    }
   }
 
   public void testConsumerThroughput() throws Exception {
     AtomicInteger numMessages = new AtomicInteger();
+    long startTime = System.currentTimeMillis();
     registerOffsets();
     systemConsumer.start();
-    long startTime = System.currentTimeMillis();
     while (System.currentTimeMillis() - startTime <= timeToRunSecs) {
-      Map<SystemStreamPartition, List<IncomingMessageEnvelope>> messages = systemConsumer.poll(getOldestOffsets().keySet(), 1000);
+      Map<SystemStreamPartition, List<IncomingMessageEnvelope>> messages = systemConsumer.poll(subscribedPartitions, 1000);
       messages.forEach((ssp, msgList) -> {
         msgList.forEach(msg -> {
           //System.out.println(msg.getKey());
@@ -124,6 +129,6 @@ public class SystemConsumerBenchmark {
 
     Config config = buildConfig(factoryClazz, zkServer, bootstrapServer, maxPollRecords);
 
-    new SystemConsumerBenchmark(factoryClazz, config, timeout).testConsumerThroughput();
+    new NewSystemConsumerBenchmark(factoryClazz, config, timeout).testConsumerThroughput();
   }
 }

@@ -30,3 +30,4 @@ public class EventHubClientManagerFactory {
     return new SamzaEventHubClientManager(eventHubNamespace, entityPath, sasKeyName, sasToken);
   }
 }
+n

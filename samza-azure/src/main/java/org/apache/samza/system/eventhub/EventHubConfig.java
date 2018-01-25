@@ -36,7 +36,7 @@ public class EventHubConfig extends MapConfig {
 
   public static final String CONFIG_STREAM_LIST = "systems.%s.stream.list";
 
-  public static final String CONFIG_STREAM_NAMESPACE = "systems.%s.streams.%s.eventhubs.namespace";
+  public static final String CONFIG_STREAM_NAMESPACE_LEGACY = "systems.%s.streams.%s.eventhubs.namespace";
 
   public static final String CONFIG_STREAM_ENTITYPATH = "systems.%s.streams.%s.eventhubs.entitypath";
 
@@ -122,7 +122,7 @@ public class EventHubConfig extends MapConfig {
    * @return EventHubs namespace
    */
   public String getStreamNamespace(String systemName, String streamName) {
-    return validateRequiredConfig(getFromStreamIdOrName(CONFIG_STREAM_NAMESPACE, systemName, streamName),
+    return validateRequiredConfig(getFromStreamIdOrName(CONFIG_STREAM_NAMESPACE_LEGACY, systemName, streamName),
             "Namespace", systemName, streamName);
   }
 

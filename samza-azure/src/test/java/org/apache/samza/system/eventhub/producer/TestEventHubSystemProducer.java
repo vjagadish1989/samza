@@ -74,7 +74,7 @@ public class TestEventHubSystemProducer {
     // Set configs
     Map<String, String> configMap = new HashMap<>();
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_LIST, systemName), streamName);
-    configMap.put(String.format(EventHubConfig.CONFIG_STREAM_NAMESPACE, systemName, streamName), EVENTHUB_NAMESPACE);
+    configMap.put(String.format(EventHubConfig.CONFIG_STREAM_NAMESPACE_LEGACY, systemName, streamName), EVENTHUB_NAMESPACE);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_SAS_KEY_NAME, systemName, streamName), EVENTHUB_KEY_NAME);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_SAS_TOKEN, systemName, streamName), EVENTHUB_KEY);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_ENTITYPATH, systemName, streamName), EVENTHUB_ENTITY1);
@@ -125,7 +125,7 @@ public class TestEventHubSystemProducer {
     // Set configs
     Map<String, String> configMap = new HashMap<>();
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_LIST, systemName), streamName);
-    configMap.put(String.format(EventHubConfig.CONFIG_STREAM_NAMESPACE, systemName, streamName), EVENTHUB_NAMESPACE);
+    configMap.put(String.format(EventHubConfig.CONFIG_STREAM_NAMESPACE_LEGACY, systemName, streamName), EVENTHUB_NAMESPACE);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_SAS_KEY_NAME, systemName, streamName), EVENTHUB_KEY_NAME);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_SAS_TOKEN, systemName, streamName), EVENTHUB_KEY);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_ENTITYPATH, systemName, streamName), EVENTHUB_ENTITY1);
@@ -182,7 +182,7 @@ public class TestEventHubSystemProducer {
     // Set configs
     Map<String, String> configMap = new HashMap<>();
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_LIST, systemName), streamName);
-    configMap.put(String.format(EventHubConfig.CONFIG_STREAM_NAMESPACE, systemName, streamName), EVENTHUB_NAMESPACE);
+    configMap.put(String.format(EventHubConfig.CONFIG_STREAM_NAMESPACE_LEGACY, systemName, streamName), EVENTHUB_NAMESPACE);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_SAS_KEY_NAME, systemName, streamName), EVENTHUB_KEY_NAME);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_SAS_TOKEN, systemName, streamName), EVENTHUB_KEY);
     configMap.put(String.format(EventHubConfig.CONFIG_STREAM_ENTITYPATH, systemName, streamName), EVENTHUB_ENTITY1);
