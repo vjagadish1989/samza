@@ -91,7 +91,6 @@ public class NewKafkaSystemFactory implements SystemFactory {
       consumer.assign(startingOffsets.keySet());
       startingOffsets.forEach((tp, offset) -> {
         consumer.seek(tp, Long.parseLong(offset));
-        System.out.println("Oldest offset registered " + offset);
       });
       consumer.seekToBeginning(startingOffsets.keySet());
     }
@@ -114,12 +113,20 @@ public class NewKafkaSystemFactory implements SystemFactory {
           pauseSet.add(new TopicPartition(registeredPartition.getStream(), registeredPartition.getPartition().getPartitionId()));
         }
       }
-
+      //System.out.println("Polling from " + polledPartitions.size() + " " + resumeSet.size());
       consumer.pause(pauseSet);
       consumer.resume(resumeSet);
-      final ConsumerRecords records = consumer.poll(2000);
+      final ConsumerRecords records = consumer.poll(500);
       final Map<SystemStreamPartition, List<IncomingMessageEnvelope>> translatedRecords = translate(records);
-      //System.out.println("Translated record size: " + translatedRecords.size());
+      /*
+      System.out.println("Translated record size: " + translatedRecords.size());
+      if (translatedRecords.size() != 0) {
+        for (SystemStreamPartition ssp : translatedRecords.keySet()) {
+          System.out.println("returned records: " + translatedRecords.get(ssp).size());
+        }
+      } else {
+        System.out.println("returned no records");
+      }*/
       return translatedRecords;
     }
 

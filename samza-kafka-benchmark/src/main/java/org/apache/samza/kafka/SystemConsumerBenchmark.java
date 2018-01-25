@@ -46,6 +46,7 @@ public class SystemConsumerBenchmark {
   private final Config config;
 
   private final Set<String> topicsToConsumeFrom;
+  private Map<SystemStreamPartition, String> oldestOffsets;
   private final int timeToRunSecs;
 
   public SystemConsumerBenchmark(String factoryClassName, Config config, int timeToRun) {
@@ -58,7 +59,7 @@ public class SystemConsumerBenchmark {
   }
 
   public void registerOffsets() {
-    final Map<SystemStreamPartition, String> oldestOffsets = getOldestOffsets();
+    this.oldestOffsets = getOldestOffsets();
     oldestOffsets.forEach((topicPartition, oldestOffset) -> {
       systemConsumer.register(topicPartition, oldestOffset);
     });
@@ -70,7 +71,7 @@ public class SystemConsumerBenchmark {
     systemConsumer.start();
     long startTime = System.currentTimeMillis();
     while (System.currentTimeMillis() - startTime <= timeToRunSecs) {
-      Map<SystemStreamPartition, List<IncomingMessageEnvelope>> messages = systemConsumer.poll(getOldestOffsets().keySet(), 1000);
+      Map<SystemStreamPartition, List<IncomingMessageEnvelope>> messages = systemConsumer.poll(this.oldestOffsets.keySet(), 1000);
       messages.forEach((ssp, msgList) -> {
         msgList.forEach(msg -> {
           //System.out.println(msg.getKey());

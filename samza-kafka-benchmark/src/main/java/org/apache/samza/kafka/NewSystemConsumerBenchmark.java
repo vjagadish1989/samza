@@ -64,7 +64,7 @@ public class NewSystemConsumerBenchmark {
   public void registerOffsets() {
     for(int partitionId = 0; partitionId < 256; partitionId++) {
       SystemStreamPartition ssp = new SystemStreamPartition("kafka", "PageViewEvent", new Partition(partitionId));
-      systemConsumer.register(ssp, "junk");
+      systemConsumer.register(ssp, "2");
       subscribedPartitions.add(ssp);
     }
   }
