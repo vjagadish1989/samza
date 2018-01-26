@@ -31,7 +31,7 @@ public class SimpleStreamTask implements StreamTask {
 
   @Override
   public void process(IncomingMessageEnvelope envelope, MessageCollector collector, TaskCoordinator coordinator) throws Exception {
-    //Thread.sleep(5);
+    Thread.sleep(5);
     SamzaContainerBenchmark.numProcessed.incrementAndGet();
     //System.out.println("Inside process " + envelope.getKey());
   }
