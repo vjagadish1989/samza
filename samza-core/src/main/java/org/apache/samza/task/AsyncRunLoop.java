@@ -203,7 +203,7 @@ public class AsyncRunLoop implements Runnable, Throttleable {
   private IncomingMessageEnvelope chooseEnvelope() {
     IncomingMessageEnvelope envelope = consumerMultiplexer.choose(false);
     if (envelope != null) {
-      log.trace("Choose envelope ssp {} offset {} for processing",
+      log.info("Choose envelope ssp {} offset {} for processing",
           envelope.getSystemStreamPartition(), envelope.getOffset());
       containerMetrics.envelopes().inc();
     } else {

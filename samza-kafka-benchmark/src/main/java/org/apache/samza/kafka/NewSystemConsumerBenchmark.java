@@ -111,6 +111,7 @@ public class NewSystemConsumerBenchmark {
         .put("systems.kafka.consumer.zookeeper.connect", zkUrl)
         .put("systems.kafka.producer.bootstrap.servers", bootstrapUrl)
         .put("systems.kafka.consumer.max.poll.records", maxPollRecords)
+        .put("systems.kafka.consumer.max.partition.fetch.bytes", "500000")
         .build();
     return new MapConfig(properties);
   }

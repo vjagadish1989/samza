@@ -84,6 +84,8 @@ public class SamzaContainerBenchmark {
         .put("task.checkpoint.system", "kafka")
         .put("job.coordinator.replication.factor", "1")
         .put("systems.kafka.consumer.max.poll.records", this.maxPollRecords)
+        .put("systems.kafka.consumer.max.partition.fetch.bytes", "500000")
+        .put("serializers.registry.avro.schemas", "http://lca1-schema-registry-vip-1.corp.linkedin.com:10252/schemaRegistry/schemas")
         .build();
    return new MapConfig(cfg);
   }
@@ -114,11 +116,13 @@ public class SamzaContainerBenchmark {
 
     final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
     service.schedule(() -> {
+      System.out.println("Messages processed: " + numProcessed.get());
+      System.out.println("Throughput: " + numProcessed.get() / (this.testDurationMs/1000));
+
       container.shutdown();
     }, this.testDurationMs, TimeUnit.MILLISECONDS);
 
     container.run();
-    System.out.println("Messages processed: " + numProcessed.get());
     service.shutdownNow();
   }
 
