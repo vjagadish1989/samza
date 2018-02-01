@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 public class KafkaConsumerBenchmark {
   private final int maxPartitionId;
   private final String bootstrapUrl;
+  private final long maxFetchSize;
+  private final String topic;
   private int  maxPollRecords = 0;
   private long testDuration = 0;
 
@@ -43,11 +45,13 @@ public class KafkaConsumerBenchmark {
   private long totalMessages = 0;
   private long totalTimeMillis;
 
-  public KafkaConsumerBenchmark(String bootstrapUrl, int maxPollRecords, int maxPartitionId, long testDuration) {
+  public KafkaConsumerBenchmark(String bootstrapUrl, int maxPollRecords, int maxPartitionId, long testDuration, long maxFetchSize, String topic) {
     this.bootstrapUrl = bootstrapUrl;
     this.maxPartitionId = maxPartitionId;
     this.maxPollRecords = maxPollRecords;
     this.testDuration = testDuration;
+    this.maxFetchSize = maxFetchSize;
+    this.topic = topic;
   }
 
   public void testConsumerBehavior() throws InterruptedException {
@@ -60,14 +64,14 @@ public class KafkaConsumerBenchmark {
     int maxPartitionBytes = 20 * 1024 * 1024;
     int maxRequestBytes = maxPartitionBytes;
 
-    props.setProperty(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, String.valueOf(maxPartitionBytes));
+    props.setProperty(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, String.valueOf(this.maxFetchSize));
     props.setProperty(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, String.valueOf(maxRequestBytes));
 
     KafkaConsumer<byte[], byte[]> consumer = new KafkaConsumer<byte[], byte[]>(props);
     Set<TopicPartition> topicPartitions = new HashSet<>();
 
     for (int i = 0; i < maxPartitionId; i++) {
-      TopicPartition tp = new TopicPartition("PageViewEvent", i);
+      TopicPartition tp = new TopicPartition(topic, i);
       topicPartitions.add(tp);
     }
     consumer.assign(topicPartitions);
@@ -89,11 +93,11 @@ public class KafkaConsumerBenchmark {
     ConsumerRecords<byte[], byte[]> records;
     // make a call on the client
     try {
-      System.out.println("inside poll");
+      //System.out.println("inside poll");
       records = consumer.poll(timeout);
 
       for (ConsumerRecord<byte[], byte[]> record: records) {
-        System.out.println("inside poll2");
+        //System.out.println("inside poll2");
 
         totalMessages++;
       }
@@ -111,10 +115,14 @@ public class KafkaConsumerBenchmark {
 
   public static void main(String[] args) throws Exception {
     String bootstrapUrl = args[0];
+
     int maxPollRecords = Integer.parseInt(args[1]);
     int maxPartitionId = Integer.parseInt(args[2]);
     long testDuration = Long.parseLong(args[3]);
-    KafkaConsumerBenchmark perf = new KafkaConsumerBenchmark(bootstrapUrl, maxPollRecords, maxPartitionId, testDuration);
+    String topic = args[4];
+    long maxFetchSize = Long.parseLong(args[5]);
+
+    KafkaConsumerBenchmark perf = new KafkaConsumerBenchmark(bootstrapUrl, maxPollRecords, maxPartitionId, testDuration, maxFetchSize, topic);
     perf.testConsumerBehavior();
   }
 }

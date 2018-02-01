@@ -61,30 +61,44 @@ public class SamzaContainerBenchmark {
   private final String maxPollRecords;
   private final long testDurationMs;
   public static AtomicLong numProcessed = new AtomicLong(0);
+  private final String topicName;
+  private final long maxPartition;
+  private final String partitionFetchBytes;
+  private final String bemSize;
 
-  public SamzaContainerBenchmark(String bootstrapUrl, String zkUrl, String factoryClazz, String maxPollRecords, long testDurationMs) {
+
+  public SamzaContainerBenchmark(String bootstrapUrl, String zkUrl, String factoryClazz, String maxPollRecords, long testDurationMs, long maxPartition, String topicName, String partitionFetchBytes, String bemSize) {
     this.factoryClazz = factoryClazz;
     this.zkUrl = zkUrl;
     this.bootstrapUrl = bootstrapUrl;
     this.maxPollRecords = maxPollRecords;
     this.testDurationMs = testDurationMs;
+    this.topicName = topicName;
+    this.maxPartition = maxPartition;
+    this.partitionFetchBytes = partitionFetchBytes;
+    this.bemSize = bemSize;
+
     this.config = buildConfig();
   }
 
   public Config buildConfig() {
     Map<String, String> cfg = ImmutableMap.<String, String>builder().put("job.name", "container-benchmark")
         .put("task.class", "org.apache.samza.kafka.SimpleStreamTask")
-        .put("task.inputs","kafka.PageViewEvent")
+        .put("task.inputs","kafka."+topicName)
         .put("systems.kafka.samza.factory", factoryClazz)
         .put("systems.kafka.consumer.zookeeper.connect", zkUrl)
         .put("systems.kafka.producer.bootstrap.servers", bootstrapUrl)
-        .put("systems.kafka.streams.PageViewEvent.reset.offset", "true")
+        .put("systems.kafka.streams."+topicName+".reset.offset", "true")
         .put("systems.kafka.default.stream.samza.offset.default", "oldest")
         .put("job.coordinator.system", "kafka")
         .put("task.checkpoint.system", "kafka")
         .put("job.coordinator.replication.factor", "1")
         .put("systems.kafka.consumer.max.poll.records", this.maxPollRecords)
-        .put("systems.kafka.consumer.max.partition.fetch.bytes", "500000")
+        .put("job.factory.class", "org.apache.samza.job.local.ProcessJobFactory")
+        .put("job.systemstreampartition.matcher.class", "org.apache.samza.system.RangeSystemStreamPartitionMatcher")
+        .put("job.systemstreampartition.matcher.config.ranges", "0-"+this.maxPartition)
+        .put("systems.kafka.consumer.max.partition.fetch.bytes", partitionFetchBytes)
+        .put("systems.kafka.samza.fetch.threshold", bemSize)
         .put("serializers.registry.avro.schemas", "http://lca1-schema-registry-vip-1.corp.linkedin.com:10252/schemaRegistry/schemas")
         .build();
    return new MapConfig(cfg);
@@ -153,10 +167,19 @@ public class SamzaContainerBenchmark {
     String bootstrapUrl = args[1];
     String factoryClazz = args[2];
     String maxPollRecords = args[3];
-    System.out.println("max poll records " + maxPollRecords);
     long testDurationMs = Integer.parseInt(args[4]);
+    long maxPartition = Integer.parseInt(args[5]);
+    String topicName = args[6];
+    String partitionFetchBytes = args[7];
+    String shouldSleep = args[8];
+    String bemSize = args[9];
 
-    new SamzaContainerBenchmark(bootstrapUrl, zkUrl, factoryClazz, maxPollRecords, testDurationMs).runSamzaContainer();
+    System.out.println("max poll records " + maxPollRecords);
+    if ("sleep".equals(shouldSleep)) {
+      SimpleStreamTask.shouldSleep = true;
+    }
+
+    new SamzaContainerBenchmark(bootstrapUrl, zkUrl, factoryClazz, maxPollRecords, testDurationMs, maxPartition, topicName, partitionFetchBytes, bemSize).runSamzaContainer();
   }
 }
 

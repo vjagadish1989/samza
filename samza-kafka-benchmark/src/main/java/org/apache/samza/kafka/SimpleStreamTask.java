@@ -28,10 +28,13 @@ import org.apache.samza.task.TaskCoordinator;
  * Created by jvenkatr on 1/24/18.
  */
 public class SimpleStreamTask implements StreamTask {
+  public static boolean shouldSleep = false;
 
   @Override
   public void process(IncomingMessageEnvelope envelope, MessageCollector collector, TaskCoordinator coordinator) throws Exception {
-    Thread.sleep(5);
+    if (shouldSleep) {
+      Thread.sleep(5);
+    }
     SamzaContainerBenchmark.numProcessed.incrementAndGet();
     //System.out.println("Inside process " + envelope.getKey());
   }
