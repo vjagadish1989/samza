@@ -182,4 +182,3 @@ public class SamzaContainerBenchmark {
     new SamzaContainerBenchmark(bootstrapUrl, zkUrl, factoryClazz, maxPollRecords, testDurationMs, maxPartition, topicName, partitionFetchBytes, bemSize).runSamzaContainer();
   }
 }
-

@@ -53,8 +53,9 @@ public class NewKafkaSystemFactory implements SystemFactory {
   public SystemConsumer getConsumer(String systemName, Config config, MetricsRegistry registry) {
     String bootstrapUrl = config.get("systems.kafka.producer.bootstrap.servers");
     String maxPollRecords = config.get("systems.kafka.consumer.max.poll.records");
+    String fetchMaxBytes = config.get("systems.kafka.consumer.max.partition.fetch.bytes");
 
-    return new Consumer(bootstrapUrl, maxPollRecords);
+    return new Consumer(bootstrapUrl, maxPollRecords, fetchMaxBytes);
   }
 
   @Override
@@ -115,10 +116,12 @@ public class NewKafkaSystemFactory implements SystemFactory {
     private final Set<TopicPartition> topicPartitions = new HashSet<>();
     private final String maxPollRecords;
     private final String bootstrapUrl;
+    private final String partitionFetchMaxBytes;
 
-    public Consumer(String bootstrapUrl, String maxPollRecords) {
+    public Consumer(String bootstrapUrl, String maxPollRecords, String partitionFetchMaxBytes) {
       this.maxPollRecords = maxPollRecords;
       this.bootstrapUrl = bootstrapUrl;
+      this.partitionFetchMaxBytes = partitionFetchMaxBytes;
       this.consumer = new KafkaConsumer<byte[], byte[]>(getConsumerProperties());
     }
 
@@ -234,7 +237,7 @@ public class NewKafkaSystemFactory implements SystemFactory {
       props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapUrl);
       props.setProperty(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, this.maxPollRecords);
       props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-      props.setProperty(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, "500000");
+      props.setProperty(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, this.partitionFetchMaxBytes);
 
       //props.setProperty(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, String.valueOf(maxPartitionBytes));
       //props.setProperty(ConsumerConfig.FETCH_MAX_BYTES_CONFIG, String.valueOf(maxRequestBytes));
