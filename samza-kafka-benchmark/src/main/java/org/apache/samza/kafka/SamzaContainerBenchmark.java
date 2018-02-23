@@ -20,6 +20,7 @@
 package org.apache.samza.kafka;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 import org.apache.samza.SamzaException;
 import org.apache.samza.config.Config;
 import org.apache.samza.config.JavaSystemConfig;
@@ -40,6 +41,11 @@ import org.apache.samza.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -104,7 +110,7 @@ public class SamzaContainerBenchmark {
    return new MapConfig(cfg);
   }
 
-  public void runSamzaContainer() {
+  public void runSamzaContainer()  {
 
     JobModel jobModel = getJobModel();
     System.out.println(jobModel);
@@ -130,8 +136,20 @@ public class SamzaContainerBenchmark {
 
     final ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
     service.schedule(() -> {
+      long throughput = numProcessed.get() / (this.testDurationMs/1000);
       System.out.println("Messages processed: " + numProcessed.get());
-      System.out.println("Throughput: " + numProcessed.get() / (this.testDurationMs/1000));
+      System.out.println("Throughput: " + throughput);
+      String output = String.format("%s, %s, %s, %s, %s, %s, %s", maxPartition, maxPollRecords, partitionFetchBytes,
+          bemSize, topicName, SimpleStreamTask.shouldSleep, throughput);
+      System.out.println("Output: " + output);
+      try {
+        BufferedWriter bw = new BufferedWriter(new FileWriter("results", true));
+        bw.write(output);
+        bw.newLine();
+        bw.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
 
       container.shutdown();
     }, this.testDurationMs, TimeUnit.MILLISECONDS);
