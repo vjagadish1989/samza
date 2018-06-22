@@ -34,8 +34,10 @@ import org.apache.samza.metrics.ReadableMetricsRegistry;
 import org.apache.samza.metrics.reporter.JmxReporter;
 import org.apache.samza.system.StreamMetadataCache;
 import org.apache.samza.system.SystemAdmin;
+import org.apache.samza.system.SystemAdmins;
 import org.apache.samza.system.SystemFactory;
 import org.apache.samza.task.StreamTaskFactory;
+import org.apache.samza.util.ScalaJavaUtil;
 import org.apache.samza.util.SystemClock;
 import org.apache.samza.util.Util;
 import org.slf4j.Logger;
@@ -106,6 +108,7 @@ public class SamzaContainerBenchmark {
         .put("systems.kafka.consumer.max.partition.fetch.bytes", partitionFetchBytes)
         .put("systems.kafka.samza.fetch.threshold", bemSize)
         .put("serializers.registry.avro.schemas", "http://lca1-schema-registry-vip-1.corp.linkedin.com:10252/schemaRegistry/schemas")
+        .put("systems.kafka.kafka.cluster","tracking")
         .build();
    return new MapConfig(cfg);
   }
@@ -119,7 +122,7 @@ public class SamzaContainerBenchmark {
         "0",
         jobModel,
         this.config,
-        Util.<String, MetricsReporter>javaMapAsScalaMap(ImmutableMap.of("jmx", new MetricsReporter() {
+        ScalaJavaUtil.<String, MetricsReporter>toScalaMap(ImmutableMap.of("jmx", new MetricsReporter() {
           @Override
           public void start() {
           }
@@ -167,12 +170,13 @@ public class SamzaContainerBenchmark {
         LOG.error(String.format("A stream uses system %s, which is missing from the configuration.", systemName));
         throw new SamzaException(String.format("A stream uses system %s, which is missing from the configuration.", systemName));
       }
-      SystemFactory systemFactory = Util.<SystemFactory>getObj(systemFactoryClassName);
+      SystemFactory systemFactory = Util.<SystemFactory>getObj(systemFactoryClassName, SystemFactory.class);
       systemAdmins.put(systemName, systemFactory.getAdmin(systemName, this.config));
     }
 
+
     StreamMetadataCache streamMetadataCache = new StreamMetadataCache(
-        Util.<String, SystemAdmin>javaMapAsScalaMap(systemAdmins), 5000, SystemClock.instance());
+        new SystemAdmins(this.config), 5000, SystemClock.instance());
 
     String containerId = "0";
 

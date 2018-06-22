@@ -29,11 +29,13 @@ class SamzaContainerMetrics(
 
   val commits = newCounter("commit-calls")
   val windows = newCounter("window-calls")
+  val timers = newCounter("timer-calls")
   val processes = newCounter("process-calls")
   val envelopes = newCounter("process-envelopes")
   val nullEnvelopes = newCounter("process-null-envelopes")
   val chooseNs = newTimer("choose-ns")
   val windowNs = newTimer("window-ns")
+  val timerNs = newTimer("timer-ns")
   val processNs = newTimer("process-ns")
   val commitNs = newTimer("commit-ns")
   val blockNs = newTimer("block-ns")
@@ -45,6 +47,8 @@ class SamzaContainerMetrics(
   val physicalMemoryMb = newGauge[Double]("physical-memory-mb", 0.0F)
 
   val taskStoreRestorationMetrics: util.Map[TaskName, Gauge[Long]] = new util.HashMap[TaskName, Gauge[Long]]()
+
+  val exceptions = newListGauge[String]("exceptions")
 
   def addStoreRestorationGauge(taskName: TaskName, storeName: String) {
     taskStoreRestorationMetrics.put(taskName, newGauge("%s-%s-restore-time" format(taskName.toString, storeName), -1L))

@@ -23,29 +23,29 @@ import java.util
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
-import org.apache.samza.metrics.MetricsRegistryMap
-import org.apache.samza.{SamzaContainerStatus, Partition}
 import org.apache.samza.checkpoint.{Checkpoint, CheckpointManager}
 import org.apache.samza.config.{Config, MapConfig}
 import org.apache.samza.coordinator.JobModelManager
 import org.apache.samza.coordinator.server.{HttpServer, JobServlet}
 import org.apache.samza.job.model.{ContainerModel, JobModel, TaskModel}
+import org.apache.samza.metrics.MetricsRegistryMap
 import org.apache.samza.serializers.SerdeManager
 import org.apache.samza.storage.TaskStorageManager
+import org.apache.samza.system._
 import org.apache.samza.system.chooser.RoundRobinChooser
-import org.apache.samza.system.{IncomingMessageEnvelope, StreamMetadataCache, SystemConsumer, SystemConsumers, SystemProducer, SystemProducers, SystemStream, SystemStreamPartition}
-import org.apache.samza.task.{ClosableTask, InitableTask, MessageCollector, StreamTask, TaskContext, TaskCoordinator, TaskInstanceCollector}
+import org.apache.samza.task._
 import org.apache.samza.util.SinglePartitionWithoutOffsetsSystemAdmin
+import org.apache.samza.{Partition, SamzaContainerStatus}
 import org.junit.Assert._
 import org.junit.Test
+import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.junit.AssertionsForJUnit
 import org.scalatest.mockito.MockitoSugar
 
-import scala.collection.JavaConverters._
-import org.mockito.Mockito.when
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
   @Test
@@ -128,8 +128,9 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
       new SystemStreamPartition("test", "stream1", new Partition(1)),
       new SystemStreamPartition("test", "stream2", new Partition(0)),
       new SystemStreamPartition("test", "stream2", new Partition(1)))
-    val systemAdmins = Map("test" -> new SinglePartitionWithoutOffsetsSystemAdmin)
-    val metadata = new StreamMetadataCache(systemAdmins).getStreamMetadata(inputStreams.map(_.getSystemStream).toSet)
+    val systemAdmins = mock[SystemAdmins]
+    when(systemAdmins.getSystemAdmin("test")).thenReturn(new SinglePartitionWithoutOffsetsSystemAdmin)
+    val metadata = new StreamMetadataCache(systemAdmins).getStreamMetadata(inputStreams.map(_.getSystemStream))
     assertNotNull(metadata)
     assertEquals(2, metadata.size)
     val stream1Metadata = metadata(new SystemStream("test", "stream1"))
@@ -158,6 +159,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
     }
     val config = new MapConfig
     val taskName = new TaskName("taskName")
+    val systemAdmins = new SystemAdmins(config)
     val consumerMultiplexer = new SystemConsumers(
       new RoundRobinChooser,
       Map[String, SystemConsumer]())
@@ -190,6 +192,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
       containerContext = containerContext,
       taskInstances = Map(taskName -> taskInstance),
       runLoop = runLoop,
+      systemAdmins = systemAdmins,
       consumerMultiplexer = consumerMultiplexer,
       producerMultiplexer = producerMultiplexer,
       metrics = new SamzaContainerMetrics)
@@ -239,6 +242,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
     }
     val config = new MapConfig
     val taskName = new TaskName("taskName")
+    val systemAdmins = new SystemAdmins(config)
     val consumerMultiplexer = new SystemConsumers(
       new RoundRobinChooser,
       Map[String, SystemConsumer]())
@@ -270,6 +274,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
       containerContext = containerContext,
       taskInstances = Map(taskName -> taskInstance),
       runLoop = mockRunLoop,
+      systemAdmins = systemAdmins,
       consumerMultiplexer = consumerMultiplexer,
       producerMultiplexer = producerMultiplexer,
       metrics = new SamzaContainerMetrics)
@@ -319,6 +324,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
     }
     val config = new MapConfig
     val taskName = new TaskName("taskName")
+    val systemAdmins = new SystemAdmins(config)
     val consumerMultiplexer = new SystemConsumers(
       new RoundRobinChooser,
       Map[String, SystemConsumer]())
@@ -351,6 +357,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
       containerContext = containerContext,
       taskInstances = Map(taskName -> taskInstance),
       runLoop = runLoop,
+      systemAdmins = systemAdmins,
       consumerMultiplexer = consumerMultiplexer,
       producerMultiplexer = producerMultiplexer,
       metrics = new SamzaContainerMetrics)
@@ -398,6 +405,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
     }
     val config = new MapConfig
     val taskName = new TaskName("taskName")
+    val systemAdmins = new SystemAdmins(config)
     val consumerMultiplexer = new SystemConsumers(
       new RoundRobinChooser,
       Map[String, SystemConsumer]())
@@ -433,6 +441,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
       containerContext = containerContext,
       taskInstances = Map(taskName -> taskInstance),
       runLoop = mockRunLoop,
+      systemAdmins = systemAdmins,
       consumerMultiplexer = consumerMultiplexer,
       producerMultiplexer = producerMultiplexer,
       metrics = new SamzaContainerMetrics)
@@ -474,6 +483,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
     }
     val config = new MapConfig
     val taskName = new TaskName("taskName")
+    val systemAdmins = new SystemAdmins(config)
     val consumerMultiplexer = new SystemConsumers(
       new RoundRobinChooser,
       Map[String, SystemConsumer]())
@@ -509,6 +519,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
       containerContext = containerContext,
       taskInstances = Map(taskName -> taskInstance),
       runLoop = mockRunLoop,
+      systemAdmins = systemAdmins,
       consumerMultiplexer = consumerMultiplexer,
       producerMultiplexer = producerMultiplexer,
       metrics = new SamzaContainerMetrics)
@@ -542,6 +553,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
     }
     val config = new MapConfig
     val taskName = new TaskName("taskName")
+    val systemAdmins = new SystemAdmins(config)
     val consumerMultiplexer = new SystemConsumers(
       new RoundRobinChooser,
       Map[String, SystemConsumer]())
@@ -576,6 +588,7 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
       containerContext = containerContext,
       taskInstances = Map(taskName -> taskInstance),
       runLoop = null,
+      systemAdmins = systemAdmins,
       consumerMultiplexer = consumerMultiplexer,
       producerMultiplexer = producerMultiplexer,
       metrics = containerMetrics)
@@ -585,6 +598,40 @@ class TestSamzaContainer extends AssertionsForJUnit with MockitoSugar {
     assertNotNull(containerMetrics.taskStoreRestorationMetrics.get(taskName))
     assertTrue(containerMetrics.taskStoreRestorationMetrics.get(taskName).getValue >= 1)
 
+  }
+
+  @Test
+  def testGetChangelogSSPsForContainer() = {
+    val taskName0 = new TaskName("task0")
+    val taskName1 = new TaskName("task1")
+    val taskModel0 = new TaskModel(taskName0,
+      Set(new SystemStreamPartition("input", "stream", new Partition(0))),
+      new Partition(10))
+    val taskModel1 = new TaskModel(taskName1,
+      Set(new SystemStreamPartition("input", "stream", new Partition(1))),
+      new Partition(11))
+    val containerModel = new ContainerModel("processorId", 0, Map(taskName0 -> taskModel0, taskName1 -> taskModel1))
+    val changeLogSystemStreams = Map("store0" -> new SystemStream("changelogSystem0", "store0-changelog"),
+      "store1" -> new SystemStream("changelogSystem1", "store1-changelog"))
+    val expected = Set(new SystemStreamPartition("changelogSystem0", "store0-changelog", new Partition(10)),
+      new SystemStreamPartition("changelogSystem1", "store1-changelog", new Partition(10)),
+      new SystemStreamPartition("changelogSystem0", "store0-changelog", new Partition(11)),
+      new SystemStreamPartition("changelogSystem1", "store1-changelog", new Partition(11)))
+    assertEquals(expected, SamzaContainer.getChangelogSSPsForContainer(containerModel, changeLogSystemStreams))
+  }
+
+  @Test
+  def testGetChangelogSSPsForContainerNoChangelogs() = {
+    val taskName0 = new TaskName("task0")
+    val taskName1 = new TaskName("task1")
+    val taskModel0 = new TaskModel(taskName0,
+      Set(new SystemStreamPartition("input", "stream", new Partition(0))),
+      new Partition(10))
+    val taskModel1 = new TaskModel(taskName1,
+      Set(new SystemStreamPartition("input", "stream", new Partition(1))),
+      new Partition(11))
+    val containerModel = new ContainerModel("processorId", 0, Map(taskName0 -> taskModel0, taskName1 -> taskModel1))
+    assertEquals(Set(), SamzaContainer.getChangelogSSPsForContainer(containerModel, Map()))
   }
 }
 

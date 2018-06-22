@@ -25,13 +25,17 @@ import java.util.Map;
 import org.apache.samza.SamzaException;
 import org.apache.samza.config.JavaTableConfig;
 import org.apache.samza.config.StorageConfig;
+import org.apache.samza.container.SamzaContainerContext;
 import org.apache.samza.storage.StorageEngine;
 import org.apache.samza.table.TableSpec;
+import org.apache.samza.task.TaskContext;
+import org.apache.samza.util.NoOpMetricsRegistry;
 import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.Assert;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +59,11 @@ public class TestLocalBaseStoreBackedTableProvider {
   @Test
   public void testInit() {
     StorageEngine store = mock(KeyValueStorageEngine.class);
-    tableProvider.init(store);
+    SamzaContainerContext containerContext = mock(SamzaContainerContext.class);
+    TaskContext taskContext = mock(TaskContext.class);
+    when(taskContext.getStore(any())).thenReturn(store);
+    when(taskContext.getMetricsRegistry()).thenReturn(new NoOpMetricsRegistry());
+    tableProvider.init(containerContext, taskContext);
     Assert.assertNotNull(tableProvider.getTable());
   }
 

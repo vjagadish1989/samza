@@ -53,7 +53,7 @@ public class NewSystemConsumerBenchmark {
 
   public NewSystemConsumerBenchmark(String factoryClassName, Config config, int timeToRun) {
     this.factoryClassName = factoryClassName;
-    this.systemFactory = Util.getObj(factoryClassName);
+    this.systemFactory = Util.getObj(factoryClassName, SystemFactory.class);
     this.topicsToConsumeFrom = ImmutableSet.of("PageViewEvent");
     this.config = config;
     this.systemConsumer = systemFactory.getConsumer("kafka", config, new MetricsRegistryMap());

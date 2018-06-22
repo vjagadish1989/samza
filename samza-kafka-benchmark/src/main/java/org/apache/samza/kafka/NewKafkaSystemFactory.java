@@ -65,7 +65,7 @@ public class NewKafkaSystemFactory implements SystemFactory {
 
   @Override
   public SystemAdmin getAdmin(String systemName, Config config) {
-    SystemFactory factory = Util.getObj("org.apache.samza.system.kafka.KafkaSystemFactory");
+    SystemFactory factory = Util.getObj("org.apache.samza.system.kafka.KafkaSystemFactory", SystemFactory.class);
     return factory.getAdmin(systemName, config);
   }
 
